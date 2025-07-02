@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     [Header("Player Variables")]
     [SerializeField] [Tooltip("The speed in which the player flies.")] private float flySpeed;
     [SerializeField] [Tooltip("The speed in which the player is able to turn.")] private float yAmount;
+    [SerializeField] private GameObject speedEffect;
 
     private float yAxis;
     private Rigidbody rb;
@@ -21,7 +22,8 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        transform.position += transform.forward * flySpeed * Time.deltaTime;
+        //rb.position += transform.forward * flySpeed * Time.deltaTime;
+        rb.MovePosition(transform.forward * flySpeed * Time.fixedDeltaTime);
 
         //Rotation on Y Axis to get TurnMovement or Left and Right Movement
         float horizontalInput = Input.GetAxis("Horizontal");
@@ -45,15 +47,31 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    //Function for gradual addition of speed, with limit at 30, plus speed effect
     private void Acceleration()
     {
-        //Gradual addition of speed, with limit at 30, plus effect
-        flySpeed += 5f;
+        speedEffect.SetActive(true);
+        if (flySpeed >= 30f)
+        {
+            flySpeed = 30f;
+        }
+        else
+        {
+            flySpeed += 5f * Time.deltaTime;
+        }
     }
 
+    //Function to slowly substracts speed at a limit of 10, plus quit speed effect
     private void Breaking()
     {
-        //Makes sudden stop, slowly substracts speed at limit of 10, plus effect
-        flySpeed -= 5f;
+        speedEffect.SetActive(false);
+        if (flySpeed <= 10f)
+        {
+            flySpeed = 10f;
+        }
+        else
+        {
+            flySpeed -= 7f * Time.deltaTime;
+        }
     }
 }
