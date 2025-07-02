@@ -23,7 +23,8 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         //rb.position += transform.forward * flySpeed * Time.deltaTime;
-        rb.MovePosition(transform.forward * flySpeed * Time.fixedDeltaTime);
+        Vector3 direction = rb.rotation * transform.forward * flySpeed;
+        rb.MovePosition(direction * Time.fixedDeltaTime);
 
         //Rotation on Y Axis to get TurnMovement or Left and Right Movement
         float horizontalInput = Input.GetAxis("Horizontal");
