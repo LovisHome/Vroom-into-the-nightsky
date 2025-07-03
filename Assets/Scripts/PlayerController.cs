@@ -1,22 +1,32 @@
+using System.Collections;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Player Variables")]
+    [Header("Physics for the Player")]
+    [SerializeField] [Tooltip("Particle Effect for the Speed.")] private GameObject speedEffect;
     [SerializeField] [Tooltip("The speed in which the player flies.")] private float flySpeed;
     [SerializeField] [Tooltip("The speed in which the player is able to turn.")] private float yAmount;
-    [SerializeField] [Tooltip("Particle Effect for the Speed.")] private GameObject speedEffect;
+    [SerializeField] [Tooltip("The maximum amount of speed the player can have.")] private float maxSpeed = 30f;
+    [SerializeField] [Tooltip("The amount of friction that the drag of the player generates.")] private float drag = 0.995f;
+    [SerializeField] [Tooltip("The angle in which the player can steer.")] private float steerAngle = 20f;
+    [SerializeField] [Tooltip("The amount of traction of the player.")] private float traction = 1f;
 
-    [SerializeField] private float maxSpeed = 30f;
-    [SerializeField] private float drag = 0.995f;
-    [SerializeField] private float steerAngle = 20f;
-    [SerializeField] private float traction = 1f;
+    [Header("Drifting Mechanic Variables")]
+    [SerializeField] private float driftSteerMultiplier = 1.5f;
+    [SerializeField] private float boostForce = 20f;
+    [SerializeField] private GameObject boostEffect;
 
     private Vector3 moveForce; //The actual velocity-like force applied to the rigidbody
-
     private float yAxis;
     private Rigidbody rb;
+
+    //Drifting Mechanic
+    private bool isDrifting = false;
+    private float driftTimer = 0f;
+    private bool wasDrifting = false;
+    private float driftThreshold = 0.5f;
 
     private void Awake()
     {
@@ -27,41 +37,56 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //Drifting Mechanic
+        HandleDrift();
+
         // Inputs
         float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1f, 1f);
+        float verticalInput = Input.GetAxis("Vertical");
+        //float verticalInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1f, 1f);
 
-        // Adds Forward Force
-        moveForce += transform.forward * flySpeed * Time.fixedDeltaTime;
+        if (!isDrifting)
+        {
+            rb.velocity = transform.forward * flySpeed;
 
-        // Apply the Drag and Limit Speed
-        moveForce *= drag;
+            yAxis += -horizontalInput * yAmount * Time.deltaTime;
 
-        // Apply the Steering
-        float steerInput = horizontalInput;
-        float steerAmount = -steerInput * moveForce.magnitude * steerAngle * Time.fixedDeltaTime;
-        yAxis += steerAmount;
+            float xAxis = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput); // Pitch
+            float zAxis = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput); // Roll
 
-        // Calculates Pitch (xAxis) and Roll (zAxis)
-        float pitch = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput);
-        float roll = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput);
+            Quaternion targetRotation = Quaternion.Euler(-xAxis, -yAxis, zAxis);
+            rb.MoveRotation(targetRotation);
+        }
+        else
+        {
+            // Adds Forward Force/Movement
+            moveForce += transform.forward * flySpeed * Time.fixedDeltaTime;
 
-        // Final Rotation
-        Quaternion targetRotation = Quaternion.Euler(-pitch, -yAxis, roll);
-        rb.MoveRotation(targetRotation);
+            // Apply the Drag and Limit Speed
+            moveForce *= drag;
 
-        // Apply the Traction
-        moveForce = Vector3.Lerp(moveForce, transform.forward * moveForce.magnitude, traction * Time.fixedDeltaTime);
-        moveForce = Vector3.ClampMagnitude(moveForce, maxSpeed);
+            // Apply the Steering
+            float steerAmount = -horizontalInput * moveForce.magnitude * steerAngle * Time.fixedDeltaTime;
+            if (isDrifting) steerAmount *= driftSteerMultiplier;
+            yAxis += steerAmount;
 
-        // Apply final velocity
-        rb.velocity = moveForce;
+            // Calculates Pitch (xAxis) and Roll (zAxis)
+            float pitch = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput);
+            float roll = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput);
 
-        Debug.Log($"Final Velocity: {rb.velocity} | Magnitude: {rb.velocity.magnitude}");
+            // Final Rotation
+            Quaternion targetRotation = Quaternion.Euler(-pitch, -yAxis, roll);
+            rb.MoveRotation(targetRotation);
 
-        // Debuging Help
-        Debug.DrawRay(transform.position, transform.forward * 3, Color.green);
-        Debug.DrawRay(transform.position, rb.velocity, Color.yellow);
+            // Apply the Traction
+            moveForce = Vector3.Lerp(moveForce, transform.forward * moveForce.magnitude, traction * Time.fixedDeltaTime);
+            moveForce = Vector3.ClampMagnitude(moveForce, maxSpeed);
+
+            // Apply final velocity
+            rb.velocity = moveForce;
+        }
+
+        //Debug.Log($"Final Velocity: {rb.velocity} | Magnitude: {rb.velocity.magnitude}");
 
         //Accelerate/Break
         if (Input.GetKey(KeyCode.Mouse0))
@@ -73,6 +98,46 @@ public class PlayerController : MonoBehaviour
             Breaking();
         }
 
+    }
+
+    private void HandleDrift()
+    {
+        bool isTurning = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f;
+        bool ctrlHeld = Input.GetKey(KeyCode.LeftControl);
+
+        // Start Drifting
+        if (isTurning && ctrlHeld && !isDrifting)
+        {
+            isDrifting = true;
+            driftTimer = 0f;
+            wasDrifting = false;
+        }
+
+        // While Drifting
+        if (isDrifting && ctrlHeld)
+        {
+            driftTimer += Time.fixedDeltaTime;
+            wasDrifting = true;
+        }
+
+        // Stop Drifting
+        if (isDrifting && !ctrlHeld)
+        {
+            isDrifting = false;
+
+            if (driftTimer >= driftThreshold)
+            {
+                rb.velocity += transform.forward * boostForce;
+
+                if (boostEffect != null)
+                {
+                    boostEffect.SetActive(true);
+                    StartCoroutine(DisableBoostEffect());
+                }
+            }
+
+            driftTimer = 0f;
+        }
     }
 
     //Function for gradual addition of speed, with limit at 30, plus speed effect
@@ -101,5 +166,11 @@ public class PlayerController : MonoBehaviour
         {
             flySpeed -= 7f * Time.deltaTime;
         }
+    }
+
+    private IEnumerator DisableBoostEffect()
+    {
+        yield return new WaitForSeconds(1f);
+        boostEffect.SetActive(false);
     }
 }
