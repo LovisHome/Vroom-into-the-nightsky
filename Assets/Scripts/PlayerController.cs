@@ -8,6 +8,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] [Tooltip("The speed in which the player is able to turn.")] private float yAmount;
     [SerializeField] [Tooltip("Particle Effect for the Speed.")] private GameObject speedEffect;
 
+    [SerializeField] private float maxSpeed = 30f;
+    [SerializeField] private float drag = 0.995f;
+    [SerializeField] private float steerAngle = 20f;
+    [SerializeField] private float traction = 1f;
+
+    private Vector3 moveForce; //The actual velocity-like force applied to the rigidbody
+
     private float yAxis;
     private Rigidbody rb;
 
@@ -15,24 +22,46 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        rb.useGravity = false;
     }
 
     private void FixedUpdate()
     {
-        //Forward Movement
-        rb.velocity = transform.forward * flySpeed;
-
-        //Rotation on Y Axis to get TurnMovement or Left and Right Movement + Inputs
+        // Inputs
         float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
+        float verticalInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1f, 1f);
 
-        yAxis += -horizontalInput * yAmount * Time.deltaTime;
-        float xAxis = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput); //Pitch
-        float zAxis = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput); //Roll
+        // Adds Forward Force
+        moveForce += transform.forward * flySpeed * Time.fixedDeltaTime;
 
-        //rb.rotation = Quaternion.Euler(Vector3.up * yAxis + Vector3.left * xAxis + Vector3.forward * zAxis);
-        Quaternion targetRotation = Quaternion.Euler(-xAxis, -yAxis ,zAxis);
+        // Apply the Drag and Limit Speed
+        moveForce *= drag;
+
+        // Apply the Steering
+        float steerInput = horizontalInput;
+        float steerAmount = -steerInput * moveForce.magnitude * steerAngle * Time.fixedDeltaTime;
+        yAxis += steerAmount;
+
+        // Calculates Pitch (xAxis) and Roll (zAxis)
+        float pitch = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput);
+        float roll = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput);
+
+        // Final Rotation
+        Quaternion targetRotation = Quaternion.Euler(-pitch, -yAxis, roll);
         rb.MoveRotation(targetRotation);
+
+        // Apply the Traction
+        moveForce = Vector3.Lerp(moveForce, transform.forward * moveForce.magnitude, traction * Time.fixedDeltaTime);
+        moveForce = Vector3.ClampMagnitude(moveForce, maxSpeed);
+
+        // Apply final velocity
+        rb.velocity = moveForce;
+
+        Debug.Log($"Final Velocity: {rb.velocity} | Magnitude: {rb.velocity.magnitude}");
+
+        // Debuging Help
+        Debug.DrawRay(transform.position, transform.forward * 3, Color.green);
+        Debug.DrawRay(transform.position, rb.velocity, Color.yellow);
 
         //Accelerate/Break
         if (Input.GetKey(KeyCode.Mouse0))
@@ -50,9 +79,9 @@ public class PlayerController : MonoBehaviour
     private void Acceleration()
     {
         speedEffect.SetActive(true);
-        if (flySpeed >= 30f)
+        if (flySpeed >= 50f)
         {
-            flySpeed = 30f;
+            flySpeed = 50f;
         }
         else
         {
@@ -64,9 +93,9 @@ public class PlayerController : MonoBehaviour
     private void Breaking()
     {
         speedEffect.SetActive(false);
-        if (flySpeed <= 10f)
+        if (flySpeed <= 20f)
         {
-            flySpeed = 10f;
+            flySpeed = 20f;
         }
         else
         {
