@@ -17,7 +17,7 @@ public class ScoreManager : MonoBehaviour
 
     private void Update()
     {
-        scoreText.text = string.Format("Score: {0:00000}", score);
+        scoreText.text = string.Format("Score: {0:000000}", score);
     }
 
     public void PointsForScore(int _pointsReceived)

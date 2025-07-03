@@ -25,8 +25,10 @@ public class PlayerController : MonoBehaviour
     //Drifting Mechanic
     private bool isDrifting = false;
     private float driftTimer = 0f;
-    private bool wasDrifting = false;
-    private float driftThreshold = 0.5f;
+    private float driftThreshold = 0.3f;
+
+    private float driftScoreTimer;
+    private float driftScoredDuration;
 
     private void Awake()
     {
@@ -43,7 +45,6 @@ public class PlayerController : MonoBehaviour
         // Inputs
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        //float verticalInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1f, 1f);
 
         if (!isDrifting)
         {
@@ -86,8 +87,6 @@ public class PlayerController : MonoBehaviour
             rb.velocity = moveForce;
         }
 
-        //Debug.Log($"Final Velocity: {rb.velocity} | Magnitude: {rb.velocity.magnitude}");
-
         //Accelerate/Break
         if (Input.GetKey(KeyCode.Mouse0))
         {
@@ -110,14 +109,24 @@ public class PlayerController : MonoBehaviour
         {
             isDrifting = true;
             driftTimer = 0f;
-            wasDrifting = false;
+            driftScoreTimer = 0f;
+            driftScoredDuration = 0f;
+            boostEffect.SetActive(true);
         }
 
         // While Drifting
         if (isDrifting && ctrlHeld)
         {
             driftTimer += Time.fixedDeltaTime;
-            wasDrifting = true;
+            driftScoreTimer += Time.fixedDeltaTime;
+
+            //Every 0.1 seconds it gives 50 points with a limit
+            if (driftTimer >= 0.1f && driftScoredDuration < 1.0f)
+            {
+                ScoreManager.instance.PointsForScore(50);
+                driftScoreTimer -= 0.1f;
+                driftScoredDuration += 0.1f;
+            }
         }
 
         // Stop Drifting
@@ -131,7 +140,6 @@ public class PlayerController : MonoBehaviour
 
                 if (boostEffect != null)
                 {
-                    boostEffect.SetActive(true);
                     StartCoroutine(DisableBoostEffect());
                 }
             }
@@ -140,7 +148,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //Function for gradual addition of speed, with limit at 30, plus speed effect
+    //Function for gradual addition of speed, with limit at 50, plus speed effect
     private void Acceleration()
     {
         speedEffect.SetActive(true);
@@ -154,7 +162,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //Function to slowly substracts speed at a limit of 10, plus quit speed effect
+    //Function to slowly substracts speed at a limit of 20, plus quit speed effect
     private void Breaking()
     {
         speedEffect.SetActive(false);
