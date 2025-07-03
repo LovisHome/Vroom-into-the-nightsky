@@ -1,3 +1,4 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -18,17 +19,20 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //Forward Movement
         rb.velocity = transform.forward * flySpeed;
 
-        //Rotation on Y Axis to get TurnMovement or Left and Right Movement
+        //Rotation on Y Axis to get TurnMovement or Left and Right Movement + Inputs
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
-        yAxis += horizontalInput * yAmount * Time.deltaTime;
-        float xAxis = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput);
-        float zAxis = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput);
+        yAxis += -horizontalInput * yAmount * Time.deltaTime;
+        float xAxis = Mathf.Lerp(0, 20, Mathf.Abs(verticalInput)) * Mathf.Sign(verticalInput); //Pitch
+        float zAxis = Mathf.Lerp(0, 30, Mathf.Abs(horizontalInput)) * -Mathf.Sign(horizontalInput); //Roll
 
-        rb.rotation = Quaternion.Euler(Vector3.up * yAxis + Vector3.left * xAxis + Vector3.forward * zAxis);
+        //rb.rotation = Quaternion.Euler(Vector3.up * yAxis + Vector3.left * xAxis + Vector3.forward * zAxis);
+        Quaternion targetRotation = Quaternion.Euler(-xAxis, -yAxis ,zAxis);
+        rb.MoveRotation(targetRotation);
 
         //Accelerate/Break
         if (Input.GetKey(KeyCode.Mouse0))
