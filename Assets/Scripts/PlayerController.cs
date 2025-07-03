@@ -5,7 +5,7 @@ public class PlayerController : MonoBehaviour
     [Header("Player Variables")]
     [SerializeField] [Tooltip("The speed in which the player flies.")] private float flySpeed;
     [SerializeField] [Tooltip("The speed in which the player is able to turn.")] private float yAmount;
-    [SerializeField] private GameObject speedEffect;
+    [SerializeField] [Tooltip("Particle Effect for the Speed.")] private GameObject speedEffect;
 
     private float yAxis;
     private Rigidbody rb;

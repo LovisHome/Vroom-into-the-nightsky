@@ -116,15 +116,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9.35
+      value: -3.57
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.13
+      value: 2.19
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 12.56
+      value: 10.61
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
       propertyPath: m_LocalRotation.w
@@ -175,6 +175,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6023130746661085434}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7668841171664841991}
   m_SourcePrefab: {fileID: 100100000, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
 --- !u!4 &562743473391563682 stripped
 Transform:
@@ -220,6 +223,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 562743473391563682}
+--- !u!114 &7668841171664841991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6235965550623143858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f868d8eded97ef249a467a71a2a8caed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &6755761233779453192 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2a9c13479db39104da0a693cffc95204, type: 3}
