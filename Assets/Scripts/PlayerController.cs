@@ -1,3 +1,5 @@
+using DG.Tweening;
+using System;
 using System.Collections;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -14,9 +16,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] [Tooltip("The amount of traction of the player.")] private float traction = 1f;
 
     [Header("Drifting Mechanic Variables")]
+    [SerializeField] private GameObject boostEffect;
     [SerializeField] private float driftSteerMultiplier = 1.5f;
     [SerializeField] private float boostForce = 20f;
-    [SerializeField] private GameObject boostEffect;
+
+    [Header("Magical Trampoline Mechanic Variable")]
+    [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private float jumpDuration = 0.6f;
 
     private Vector3 moveForce; //The actual velocity-like force applied to the rigidbody
     private float yAxis;
@@ -25,16 +31,18 @@ public class PlayerController : MonoBehaviour
     //Drifting Mechanic
     private bool isDrifting = false;
     private float driftTimer = 0f;
-    private float driftThreshold = 0.3f;
-
     private float driftScoreTimer;
+    private float driftThreshold = 0.3f;
     private float driftScoredDuration;
+
+    //Trampoline Mechanic
+    private bool isJumping = false;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-        rb.useGravity = false;
+        rb.useGravity = true;
     }
 
     private void FixedUpdate()
@@ -46,7 +54,7 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
-        if (!isDrifting)
+        if (!isDrifting && !isJumping)
         {
             rb.velocity = transform.forward * flySpeed;
 
@@ -58,7 +66,7 @@ public class PlayerController : MonoBehaviour
             Quaternion targetRotation = Quaternion.Euler(-xAxis, -yAxis, zAxis);
             rb.MoveRotation(targetRotation);
         }
-        else
+        else if (isDrifting && !isJumping)
         {
             // Adds Forward Force/Movement
             moveForce += transform.forward * flySpeed * Time.fixedDeltaTime;
@@ -87,7 +95,7 @@ public class PlayerController : MonoBehaviour
             rb.velocity = moveForce;
         }
 
-        //Accelerate/Break
+        // Accelerate/Break
         if (Input.GetKey(KeyCode.Mouse0))
         {
             Acceleration();
@@ -97,6 +105,30 @@ public class PlayerController : MonoBehaviour
             Breaking();
         }
 
+    }
+
+    private void Update()
+    {
+        // Magical Trampoline
+        if (Input.GetKeyDown(KeyCode.Space) && !isJumping)
+        {
+            ScoreManager.instance.PointsForScore(1000);
+            StartCoroutine(PerformJump());
+        }
+    }
+
+    private IEnumerator PerformJump()
+    {
+        isJumping = true;
+
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+
+        Transform model = transform.GetChild(0);
+        model.DOLocalRotate(model.localEulerAngles + new Vector3(0, 360, 0), jumpDuration, RotateMode.FastBeyond360).SetEase(Ease.OutQuad);
+
+        yield return new WaitForSeconds(jumpDuration);
+
+        isJumping = false;
     }
 
     private void HandleDrift()
