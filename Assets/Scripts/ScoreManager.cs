@@ -12,7 +12,7 @@ public class ScoreManager : MonoBehaviour
     private void Awake()
     {
         if (instance == null) instance = this;
-        score = 0;
+        score = 5000;
     }
 
     private void Update()
@@ -23,6 +23,11 @@ public class ScoreManager : MonoBehaviour
     public void PointsForScore(int _pointsReceived)
     {
         score += _pointsReceived;
+    }
+
+    public void ReducePointsFromScore(int _pointsReduced)
+    {
+        score -= _pointsReduced;
     }
 
     public void RestartScore()
