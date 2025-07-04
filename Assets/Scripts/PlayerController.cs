@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -16,11 +17,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] [Tooltip("The amount of traction of the player.")] private float traction = 1f;
 
     [Header("Drifting Mechanic Variables")]
-    [SerializeField] private GameObject boostEffect;
+    [SerializeField] private GameObject driftEffect;
     [SerializeField] private float driftSteerMultiplier = 1.5f;
     [SerializeField] private float boostForce = 20f;
 
     [Header("Magical Trampoline Mechanic Variable")]
+    [SerializeField] private Slider jumpCooldownBar;
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private float jumpDuration = 0.6f;
 
@@ -37,6 +39,9 @@ public class PlayerController : MonoBehaviour
 
     //Trampoline Mechanic
     private bool isJumping = false;
+    private float nextJumpTime = 0f;
+    private float jumpCooldown = 30f;
+    private bool isCooldownAcitve = false;
 
     private void Awake()
     {
@@ -110,10 +115,25 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         // Magical Trampoline
-        if (Input.GetKeyDown(KeyCode.Space) && !isJumping)
+        if (Input.GetKeyDown(KeyCode.Space) && !isJumping && Time.time >= nextJumpTime)
         {
             ScoreManager.instance.PointsForScore(1000);
+            nextJumpTime = Time.time + jumpCooldown;
+            isCooldownAcitve = true;
+            jumpCooldownBar.gameObject.SetActive(true);
             StartCoroutine(PerformJump());
+        }
+
+        if (isCooldownAcitve)
+        {
+            float remaining = nextJumpTime - Time.time;
+            jumpCooldownBar.value = 1f - (remaining / jumpCooldown);
+
+            if (remaining <= 0f)
+            {
+                isCooldownAcitve = false;
+                jumpCooldownBar.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -143,7 +163,7 @@ public class PlayerController : MonoBehaviour
             driftTimer = 0f;
             driftScoreTimer = 0f;
             driftScoredDuration = 0f;
-            boostEffect.SetActive(true);
+            driftEffect.SetActive(true);
         }
 
         // While Drifting
@@ -170,7 +190,7 @@ public class PlayerController : MonoBehaviour
             {
                 rb.velocity += transform.forward * boostForce;
 
-                if (boostEffect != null)
+                if (driftEffect != null)
                 {
                     StartCoroutine(DisableBoostEffect());
                 }
@@ -211,6 +231,6 @@ public class PlayerController : MonoBehaviour
     private IEnumerator DisableBoostEffect()
     {
         yield return new WaitForSeconds(1f);
-        boostEffect.SetActive(false);
+        driftEffect.SetActive(false);
     }
 }

@@ -3,10 +3,10 @@ using TMPro;
 
 public class KeyManager : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI keysText;
-    [SerializeField] private GameObject playerController;
-    [SerializeField] private GameObject endScreen;
-    [SerializeField] private GameObject gameplayUI;
+    [SerializeField] [Tooltip("Text on UI for the key counter.")] private TextMeshProUGUI keysText;
+    [SerializeField] [Tooltip("Reference to the player in order to deactivate it.")] private GameObject playerController;
+    [SerializeField] [Tooltip("Reference to the player in order to activate it.")] private GameObject endScreen;
+    [SerializeField] [Tooltip("Reference to the GameplayUI in order to deactivate it.")] private GameObject gameplayUI;
 
     private int keyAmount;
 
