@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private float jumpDuration = 0.6f;
 
+    [Header("Pause Logic")]
+    [SerializeField] private PauseManager pauseManager;
+
     private Vector3 moveForce; //The actual velocity-like force applied to the rigidbody
     private float yAxis;
     private Rigidbody rb;
@@ -134,6 +137,12 @@ public class PlayerController : MonoBehaviour
                 isCooldownAcitve = false;
                 jumpCooldownBar.gameObject.SetActive(false);
             }
+        }
+
+        // ESC Screen
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            pauseManager.PauseGame();
         }
     }
 

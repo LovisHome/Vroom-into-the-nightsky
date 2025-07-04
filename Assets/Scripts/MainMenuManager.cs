@@ -30,6 +30,11 @@ public class MainMenuManager : MonoBehaviour
         character.transform.DOMove(new Vector3(-215, -86, 336), 1f);
     }
 
+    public void GoToMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
     public void GoToTutorial()
     {
         SceneManager.LoadScene("Tutorial");

@@ -8,9 +8,12 @@ public class Timer : MonoBehaviour
 
     private float ReducePointsTimer = 0f;
     private const float reduceInterval = 45f;
+    private bool isPaused = false;
 
     private void Update()
     {
+        if (isPaused) return;
+
         elapsedTime += Time.deltaTime;
         ReducePointsTimer += Time.deltaTime;
 
@@ -24,5 +27,15 @@ public class Timer : MonoBehaviour
             ReducePointsTimer = 0f;
             ScoreManager.instance.ReducePointsFromScore(2500);
         }
+    }
+
+    public void PauseTimer()
+    {
+        isPaused = true;
+    }
+
+    public void ResumeTimer()
+    {
+        isPaused = false;
     }
 }
