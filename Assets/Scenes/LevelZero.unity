@@ -9542,7 +9542,7 @@ MonoBehaviour:
   yAmount: 80
   maxSpeed: 50
   drag: 0.98
-  steerAngle: 7
+  steerAngle: 6
   traction: 1
   driftEffect: {fileID: 188991275}
   driftSteerMultiplier: 1.5
@@ -16975,7 +16975,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000015258789, y: 0.000009536743}
+  m_AnchoredPosition: {x: 0.000015258789, y: 0.0000076293945}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1516840472
@@ -17578,6 +17578,7 @@ Transform:
   - {fileID: 1352927123}
   - {fileID: 382773775}
   - {fileID: 456739453}
+  - {fileID: 1826748123}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1539974434
@@ -24630,11 +24631,11 @@ Transform:
   m_GameObject: {fileID: 1826748122}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -39.2}
+  m_LocalPosition: {x: 0, y: 0, z: -63.6}
   m_LocalScale: {x: 25, y: 1, z: 17.433062}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1530695086}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &1826748124
 MeshCollider:
@@ -24678,7 +24679,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 1727def9f27caf140b98df165ad771ee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -28265,7 +28266,6 @@ SceneRoots:
   - {fileID: 1350626695}
   - {fileID: 570817291}
   - {fileID: 2119274074}
-  - {fileID: 1826748123}
   - {fileID: 1530695086}
   - {fileID: 1741084806}
   - {fileID: 1653392488}
